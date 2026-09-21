@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Un Girasol para Ti - Cuestionario Interactivo</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sunflower: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#78350f',
+                            900: '#451a03',
+                        },
+                        amberGlow: '#FFC107',
+                        stemGreen: '#2D6A4F',
+                        leafGreen: '#52B788',
+                        soilBrown: '#3D2314'
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        cursive: ['"Dancing Script"', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Estilos CSS personalizados para animaciones del SVG y partículas */
+        body {
+            background: linear-gradient(135deg, #2c1a0e 0%, #1a0f08 50%, #0d0704 100%);
+            min-height: 100vh;
+            color: #fef3c7;
+            overflow-x: hidden;
+        }
+
+        /* Canvas de partículas de fondo */
+        #particles-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Animación suave para los pétalos */
+        .petal {
+            transform-origin: 200px 200px;
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0;
+            transform: scale(0) rotate(var(--angle));
+            cursor: pointer;
+        }
+
+        .petal.bloom {
+            opacity: 1;
+            transform: scale(1) rotate(var(--angle));
+        }
+
+        .petal:hover {
+            filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.9));
+        }
+
+        /* Tallo animado */
+        .stem-path {
+            stroke-dasharray: 400;
+            stroke-dashoffset: 400;
+            transition: stroke-dashoffset 1.5s ease-in-out;
+        }
+
+        .stem-path.grow {
+            stroke-dashoffset: 0;
+        }
+
+        /* Hojas animadas */
+        .leaf {
+            transition: all 1s ease-out;
+            opacity: 0;
+            transform: scale(0);
+            transform-origin: center;
+        }
+
+        .leaf.grow {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Resplandor central */
+        .flower-center {
+            transition: transform 0.5s ease;
+            transform-origin: 200px 200px;
+        }
+
+        .flower-center.pulse {
+            animation: pulseGlow 2.5s infinite alternate ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0% { filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.4)); transform: scale(0.98); }
+            100% { filter: drop-shadow(0 0 25px rgba(251, 191, 36, 0.8)); transform: scale(1.02); }
+        }
+
+        /* Vidrio Esmerilado para Tarjetas */
+        .glass-card {
+            background: rgba(30, 20, 12, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card-light {
+            background: rgba(254, 243, 199, 0.08);
+            border: 1px solid rgba(251, 191, 36, 0.15);
+        }
+
+        /* Botón Neomórfico radiante */
+        .btn-sunflower {
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+            color: #2c1a0e;
+            font-weight: 700;
+            box-shadow: 0 4px 20px rgba(217, 119, 6, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-sunflower:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(251, 191, 36, 0.6);
+            background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
+        }
+
+        .btn-sunflower:active {
+            transform: translateY(1px);
+        }
+    </style>
+</head>
+<body class="relative flex flex-col justify-between items-center min-h-screen font-sans p-4 md:p-8">
+
+    <!-- Canvas para Polvos de Oro y Partículas -->
+    <canvas id="particles-canvas"></canvas>
+
+    <header class="relative z-10 text-center max-w-2xl mx-auto my-4">
+        <h1 class="font-cursive text-5xl md:text-6xl text-sunflower-300 drop-shadow-[0_2px_10px_rgba(251,191,36,0.3)] tracking-wide mb-2">
+            Tu Girasol
+        </h1>
+        <p class="text-sunflower-100/80 text-sm md:text-base font-medium">
+            Responde cada pregunta para hacer crecer los pétalos de este girasol y revelar un mensaje especial.
+        </p>
+    </header>
+
+    <main class="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center my-auto">
+        
+        <!-- SECCIÓN IZQUIERDA: Visor del Girasol Dinámico -->
+        <div class="lg:col-span-6 flex flex-col items-center justify-center relative">
+            
+            <!-- Contenedor del SVG del Girasol -->
+            <div class="relative w-full max-w-[420px] aspect-square flex items-center justify-center glass-card rounded-3xl p-4 overflow-hidden border border-sunflower-500/30">
+                
+                <!-- Indicador de pétalos florecidos -->
+                <div class="absolute top-4 left-4 glass-card-light px-3 py-1.5 rounded-full text-xs font-semibold text-sunflower-300 flex items-center gap-2">
+                    <i class="fa-solid font-bold fa-spa text-sunflower-400"></i>
+                    <span id="petals-counter">0 / 12 Pétalos</span>
+                </div>
+
+                <button id="reset-btn" onclick="resetQuiz()" class="hidden absolute top-4 right-4 glass-card-light hover:bg-sunflower-500/20 text-sunflower-200 text-xs px-3 py-1.5 rounded-full transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right"></i> Reiniciar
+                </button>
+
+                <!-- SVG de la Flor -->
+                <svg id="sunflower-svg" viewBox="0 0 400 400" class="w-full h-full drop-shadow-[0_10px_25px_rgba(0,0,0,0.5)]">
+                    <defs>
+                        <!-- Gradientes para Pétalos y Tallo -->
+                        <linearGradient id="petalGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                            <stop offset="0%" stop-color="#d97706" />
+                            <stop offset="50%" stop-color="#f59e0b" />
+                            <stop offset="90%" stop-color="#fbbf24" />
+                            <stop offset="100%" stop-color="#fef3c7" />
+                        </linearGradient>
+
+                        <linearGradient id="centerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#451a03" />
+                            <stop offset="50%" stop-color="#2c1a0e" />
+                            <stop offset="100%" stop-color="#1a0f08" />
+                        </linearGradient>
+
+                        <linearGradient id="stemGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#1b4332" />
+                            <stop offset="50%" stop-color="#2d6a4f" />
+                            <stop offset="100%" stop-color="#52b788" />
+                        </linearGradient>
+
+                        <linearGradient id="potGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#78350f" />
+                            <stop offset="100%" stop-color="#3d2314" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Maceta / Tierra Base -->
+                    <g id="pot-group">
+                        <path d="M160 360 L240 360 L250 320 L150 320 Z" fill="url(#potGrad)" stroke="#b45309" stroke-width="2" />
+                        <ellipse cx="200" cy="320" rx="52" ry="10" fill="#2c1a0e" stroke="#78350f" stroke-width="2"/>
+                    </g>
+
+                    <!-- Tallo curvo -->
+                    <path id="stem" class="stem-path" d="M200 320 Q 190 260 200 200" fill="none" stroke="url(#stemGrad)" stroke-width="12" stroke-linecap="round" />
+
+                    <!-- Hojas verdes -->
+                    <g id="leaves">
+                        <path id="leaf-1" class="leaf" d="M195 280 C 150 270 130 240 140 230 C 160 230 180 250 195 275 Z" fill="url(#stemGrad)" />
+                        <path id="leaf-2" class="leaf" d="M205 250 C 250 240 270 210 260 200 C 240 200 220 220 205 245 Z" fill="url(#stemGrad)" />
+                    </g>
+
+                    <!-- Grupo de Pétalos (Se generan dinámicamente o se renderizan para animar) -->
+                    <g id="petals-container">
+                        <!-- Generados por JavaScript -->
+                    </g>
+
+                    <!-- Centro Semilla del Girasol -->
+                    <g id="flower-center-group" class="flower-center">
+                        <circle cx="200" cy="200" r="42" fill="url(#centerGrad)" stroke="#b45309" stroke-width="3" />
+                        <!-- Patrón de semillas en espiral de oro -->
+                        <circle cx="200" cy="200" r="38" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,5" opacity="0.6"/>
+                        <circle cx="200" cy="200" r="28" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="2,4" opacity="0.7"/>
+                        <circle cx="200" cy="200" r="18" fill="none" stroke="#fef3c7" stroke-width="1" stroke-dasharray="2,3" opacity="0.8"/>
+                    </g>
+                </svg>
+
+                <!-- Tooltip para ver mensaje del pétalo al pasar/hacer clic -->
+                <div id="petal-tooltip" class="absolute bottom-3 left-1/2 -translate-x-1/2 glass-card px-4 py-2 rounded-xl text-xs text-sunflower-200 text-center opacity-0 transition-opacity duration-300 pointer-events-none max-w-[85%] border border-sunflower-400/30">
+                    <p id="tooltip-text">Haz clic en un pétalo para leer su detalle.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN DERECHA: Cuestionario / Tarjeta de Preguntas -->
+        <div class="lg:col-span-6">
+            <div id="quiz-card" class="glass-card rounded-3xl p-6 md:p-8 relative overflow-hidden transition-all duration-500">
+                
+                <!-- Progreso -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center text-xs font-semibold text-sunflower-300/80 mb-2">
+                        <span id="question-number">Pregunta 1 de 12</span>
+                        <span id="percentage-text">0% Completado</span>
+                    </div>
+                    <div class="w-full h-2 bg-sunflower-900/60 rounded-full overflow-hidden p-0.5 border border-sunflower-700/30">
+                        <div id="progress-bar" class="h-full bg-gradient-to-r from-sunflower-600 to-sunflower-400 rounded-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+
+                <!-- Pregunta Activa -->
+                <div id="question-container" class="space-y-6">
+                    <div class="flex items-start gap-3">
+                        <span class="bg-sunflower-500/20 text-sunflower-300 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 border border-sunflower-500/30">
+                            <i class="fa-solid fa-sun"></i>
+                        </span>
+                        <h2 id="question-title" class="text-xl md:text-2xl font-bold text-sunflower-100 leading-snug">
+                            ¿Cargando pregunta...?
+                        </h2>
+                    </div>
+
+                    <!-- Opciones de Respuesta -->
+                    <div id="options-container" class="space-y-3 pt-2">
+                        <!-- Las opciones se inyectarán con JS -->
+                    </div>
+
+                    <!-- Feedback de respuesta (Correcta/Avanzar) -->
+                    <div id="feedback-msg" class="hidden p-3 rounded-xl text-xs md:text-sm font-medium flex items-center gap-2"></div>
+                </div>
+
+                <!-- TARJETA FINAL (Oculta al inicio, se muestra al completar todas) -->
+                <div id="final-card" class="hidden text-center space-y-6 py-4">
+                    <div class="w-20 h-20 bg-sunflower-500/20 border-2 border-sunflower-400 text-sunflower-300 rounded-full flex items-center justify-center mx-auto text-4xl animate-bounce">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+
+                    <h2 class="font-cursive text-4xl md:text-5xl text-sunflower-300 font-bold">
+                        ¡El Girasol Ha Florecido!
+                    </h2>
+
+                    <p id="final-message" class="text-sunflower-100/90 text-sm md:text-base leading-relaxed glass-card-light p-5 rounded-2xl border border-sunflower-400/20 italic">
+                        "Como un girasol que siempre busca la luz del sol, este detalle fue creado especialmente para recordarte lo brillante e importante que eres. ¡Gracias por responder con el corazón!"
+                    </p>
+
+                    <p class="text-xs text-sunflower-300/70">
+                        <i class="fa-solid fa-circle-info mr-1"></i> Toca individualmente cada pétalo del girasol para revivir tus respuestas.
+                    </p>
+
+                    <div class="flex flex-wrap items-center justify-center gap-4 pt-2">
+                        <button onclick="shareResult()" class="btn-sunflower px-6 py-3 rounded-xl flex items-center gap-2 text-sm">
+                            <i class="fa-solid fa-copy"></i> Copiar Mensaje
+                        </button>
+                        <button onclick="openCustomizerModal()" class="glass-card-light hover:bg-sunflower-500/20 text-sunflower-200 border border-sunflower-500/40 px-6 py-3 rounded-xl text-sm transition flex items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square"></i> Crear Mi Propio Test
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL DE CONFIGURACIÓN / PERSONALIZACIÓN -->
+    <div id="customizer-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-card w-full max-w-2xl rounded-3xl p-6 md:p-8 max-h-[90vh] overflow-y-auto border border-sunflower-500/40 space-y-6">
+            <div class="flex justify-between items-center border-b border-sunflower-500/20 pb-4">
+                <h3 class="text-xl font-bold text-sunflower-300 flex items-center gap-2">
+                    <i class="fa-solid fa-gear"></i> Personalizar Preguntas del Girasol
+                </h3>
+                <button onclick="closeCustomizerModal()" class="text-sunflower-300/60 hover:text-sunflower-100 text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-sunflower-100/70">
+                Puedes adaptar las preguntas para dedicárselo a tu pareja, mejor amigo/a o familiar.
+            </p>
+
+            <div id="custom-questions-list" class="space-y-4">
+                <!-- Se llena con JS -->
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-xs font-bold text-sunflower-300">Mensaje Final de Dedicatoria:</label>
+                <textarea id="custom-final-msg-input" rows="3" class="w-full bg-sunflower-950/60 border border-sunflower-500/30 rounded-xl p-3 text-sm text-sunflower-100 focus:outline-none focus:border-sunflower-400"></textarea>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+                <button onclick="closeCustomizerModal()" class="px-5 py-2.5 rounded-xl text-xs font-semibold text-sunflower-200 hover:bg-white/5">Cancelar</button>
+                <button onclick="saveCustomQuestions()" class="btn-sunflower px-6 py-2.5 rounded-xl text-xs">Guardar y Jugar</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="relative z-10 my-4 text-center text-xs text-sunflower-300/50">
+        <p>Hecho con <i class="fa-solid fa-heart text-amber-500"></i> para regalar flores amarillas y momentos especiales</p>
+    </footer>
+
+    <script>
+        /* ==========================================================================
+           DATOS DE PREGUNTAS POR DEFECTO (12 Preguntas = 12 Pétalos)
+           ========================================================================== */
+        const DEFAULT_QUESTIONS = [
+            {
+                question: "¿Cuál es el color principal de la luz y la alegría en un girasol?",
+                options: ["Azul marino", "Amarillo dorado", "Verde pasto", "Rosa neón"],
+                correct: 1,
+                petalNote: "Amarillo: Representa tu energía y brillo."
+            },
+            {
+                question: "¿Qué buscan siempre los girasoles durante el día?",
+                options: ["La sombra", "El agua del río", "La luz del Sol", "El viento fresco"],
+                correct: 2,
+                petalNote: "Luz: Como tú buscando siempre lo positivo."
+            },
+            {
+                question: "¿Qué cualidad describe mejor un detalle especial como este?",
+                options: ["Sinceridad", "Paciencia", "Cariño", "Todas las anteriores"],
+                correct: 3,
+                petalNote: "Cariño verdadero en cada respuesta."
+            },
+            {
+                question: "Si pudiéramos elegir un clima ideal para florecer, ¿cuál sería?",
+                options: ["Un día caluroso y soleado", "Una tarde lluviosa", "Noche estrellada", "Mañana templada"],
+                correct: 0,
+                petalNote: "Sol: El clima perfecto para florecer juntos."
+            },
+            {
+                question: "¿Qué simbolizan los girasoles en el lenguaje de las flores?",
+                options: ["Misterio y secreto", "Admiración, lealtad y felicidad", "Tristeza pasajera", "Olvido"],
+                correct: 1,
+                petalNote: "Admiración y profunda lealtad."
+            },
+            {
+                question: "¿Qué es lo que hace a una persona radiante e inolvidable?",
+                options: ["Su sonrisa sincera", "Su forma de tratar a los demás", "Su buena vibra", "Todas las anteriores"],
+                correct: 3,
+                petalNote: "Tu sonrisa hace radiar todo a tu alrededor."
+            },
+            {
+                question: "¿En qué época del año se regalan popularmente flores amarillas?",
+                options: ["Al inicio de la Primavera", "En pleno Invierno", "En Halloween", "Cualquier día es perfecto"],
+                correct: 3,
+                petalNote: "¡Cualquier día es especial para dar amor!"
+            },
+            {
+                question: "¿Cuál es el ingrediente secreto para que una relación/amistad crezca fuerte?",
+                options: ["Atención diaria", "Confianza y respeto", "Risas compartidas", "Todas juntas"],
+                correct: 3,
+                petalNote: "Confianza y momentos inolvidables."
+            },
+            {
+                question: "¿Qué hacemos cuando no hay sol en un día nublado?",
+                options: ["Los girasoles se miran entre sí para compartir energía", "Se duermen", "Se marchitan", "Esperan en silencio"],
+                correct: 0,
+                petalNote: "Nos apoyamos mutuamente en los días grises."
+            },
+            {
+                question: "¿Qué sensación transmite este jardín virtual?",
+                options: ["Calidez y paz", "Aventura", "Nostalgia bonita", "Alegría pura"],
+                correct: 0,
+                petalNote: "Paz y calidez dorada para tu día."
+            },
+            {
+                question: "Un pensamiento bonito para hoy:",
+                options: ["Sigue brillando a tu ritmo", "Eres más fuerte de lo que crees", "Nunca dejes de sonreír", "Las tres son verdaderas"],
+                correct: 3,
+                petalNote: "Nunca dejes de brillar a tu propio ritmo."
+            },
+            {
+                question: "¿Estás listo/a para ver tu girasol completamente florecido?",
+                options: ["¡Sí, quiero ver el resultado!", "¡Por supuesto!", "¡Absolutamente!", "¡Sii! 🌻"],
+                correct: 3,
+                petalNote: "¡Florecido completamente para ti!"
+            }
+        ];
+
+        let questions = JSON.parse(localStorage.getItem('sunflower_custom_questions')) || DEFAULT_QUESTIONS;
+        let currentQuestionIndex = 0;
+        let bloomedPetalsCount = 0;
+        let userAnswers = [];
+
+        // Referencias al DOM
+        const petalsContainer = document.getElementById('petals-container');
+        const stem = document.getElementById('stem');
+        const leaf1 = document.getElementById('leaf-1');
+        const leaf2 = document.getElementById('leaf-2');
+        const petalsCounter = document.getElementById('petals-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const questionNumber = document.getElementById('question-number');
+        const percentageText = document.getElementById('percentage-text');
+        const questionTitle = document.getElementById('question-title');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackMsg = document.getElementById('feedback-msg');
+        const quizCard = document.getElementById('quiz-card');
+        const questionContainer = document.getElementById('question-container');
+        const finalCard = document.getElementById('final-card');
+        const resetBtn = document.getElementById('reset-btn');
+        const tooltip = document.getElementById('petal-tooltip');
+        const tooltipText = document.getElementById('tooltip-text');
+
+        // Inicializar Pétalos en SVG
+        function renderInitialSVGStructure() {
+            petalsContainer.innerHTML = '';
+            const totalPetals = questions.length;
+            const angleStep = 360 / totalPetals;
+
+            for (let i = 0; i < totalPetals; i++) {
+                const angle = i * angleStep;
+                
+                // SVG Path para un pétalo estilizado de girasol
+                const petalGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                petalGroup.setAttribute('class', 'petal');
+                petalGroup.setAttribute('id', `petal-${i}`);
+                petalGroup.style.setProperty('--angle', `${angle}deg`);
+                
+                // Path del pétalo
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M 200 200 C 185 140, 175 70, 200 20 C 225 70, 215 140, 200 200 Z');
+                path.setAttribute('fill', 'url(#petalGrad)');
+                path.setAttribute('stroke', '#b45309');
+                path.setAttribute('stroke-width', '1');
+
+                // Detalle central de textura del pétalo
+                const innerLine = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                innerLine.setAttribute('d', 'M 200 180 L 200 60');
+                innerLine.setAttribute('stroke', '#d97706');
+                innerLine.setAttribute('stroke-width', '1.5');
+                innerLine.setAttribute('opacity', '0.5');
+
+                petalGroup.appendChild(path);
+                petalGroup.appendChild(innerLine);
+
+                // Eventos de interacción con cada pétalo
+                petalGroup.addEventListener('mouseenter', () => showPetalTooltip(i));
+                petalGroup.addEventListener('mouseleave', hidePetalTooltip);
+                petalGroup.addEventListener('click', () => showPetalTooltip(i, true));
+
+                petalsContainer.appendChild(petalGroup);
+            }
+        }
+
+        function loadQuestion() {
+            const q = questions[currentQuestionIndex];
+            questionNumber.textContent = `Pregunta ${currentQuestionIndex + 1} de ${questions.length}`;
+            
+            const progressPct = Math.round((currentQuestionIndex / questions.length) * 100);
+            progressBar.style.width = `${progressPct}%`;
+            percentageText.textContent = `${progressPct}% Completado`;
+
+            questionTitle.textContent = q.question;
+            optionsContainer.innerHTML = '';
+            feedbackMsg.classList.add('hidden');
+
+            q.options.forEach((optionText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-4 rounded-2xl glass-card-light hover:bg-sunflower-500/20 border border-sunflower-500/20 text-sunflower-100 font-medium text-sm md:text-base transition-all duration-200 flex items-center justify-between group`;
+                btn.innerHTML = `
+                    <span>${optionText}</span>
+                    <i class="fa-regular fa-circle-check opacity-0 group-hover:opacity-100 text-sunflower-300 transition-opacity"></i>
+                `;
+                btn.onclick = () => handleAnswer(idx);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(selectedIndex) {
+            const q = questions[currentQuestionIndex];
+            userAnswers.push(selectedIndex);
+
+            // Hacer crecer elementos según el avance
+            if (currentQuestionIndex === 0) {
+                stem.classList.add('grow');
+            } else if (currentQuestionIndex === 2) {
+                leaf1.classList.add('grow');
+            } else if (currentQuestionIndex === 4) {
+                leaf2.classList.add('grow');
+            }
+
+            // Florecer Pétalo correspondiente
+            bloomPetal(bloomedPetalsCount);
+            bloomedPetalsCount++;
+            petalsCounter.textContent = `${bloomedPetalsCount} / ${questions.length} Pétalos`;
+
+            // Avanzar
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                setTimeout(() => {
+                    loadQuestion();
+                }, 400);
+            } else {
+                setTimeout(() => {
+                    completeQuiz();
+                }, 600);
+            }
+        }
+
+        function bloomPetal(index) {
+            const petal = document.getElementById(`petal-${index}`);
+            if (petal) {
+                petal.classList.add('bloom');
+                // Efecto sonoro o visual extra si fuera necesario
+                triggerMicroSparkles();
+            }
+        }
+
+        function completeQuiz() {
+            // Actualizar barra al 100%
+            progressBar.style.width = `100%`;
+            percentageText.textContent = `100% Completado`;
+
+            // Animación del centro de la flor
+            document.getElementById('flower-center-group').classList.add('pulse');
+
+            // Ocultar preguntas y mostrar tarjeta final
+            questionContainer.classList.add('hidden');
+            finalCard.classList.remove('hidden');
+            resetBtn.classList.remove('hidden');
+
+            const customMsg = localStorage.getItem('sunflower_custom_final_msg');
+            if (customMsg) {
+                document.getElementById('final-message').textContent = `"${customMsg}"`;
+            }
+
+            // Disparar lluvia de destellos dorados
+            triggerGoldenConfetti();
+        }
+
+        function showPetalTooltip(index, persistent = false) {
+            const petal = document.getElementById(`petal-${index}`);
+            if (!petal || !petal.classList.contains('bloom')) return;
+
+            const note = questions[index].petalNote || `Pétalo #${index + 1} completado con éxito.`;
+            tooltipText.textContent = `🌻 Pétalo #${index + 1}: ${note}`;
+            tooltip.classList.remove('opacity-0');
+
+            if (persistent) {
+                tooltip.classList.add('ring-2', 'ring-sunflower-400');
+                setTimeout(() => tooltip.classList.remove('ring-2', 'ring-sunflower-400'), 2000);
+            }
+        }
+
+        function hidePetalTooltip() {
+            tooltip.classList.add('opacity-0');
+        }
+
+        function resetQuiz() {
+            currentQuestionIndex = 0;
+            bloomedPetalsCount = 0;
+            userAnswers = [];
+
+            // Resetear SVG
+            document.querySelectorAll('.petal').forEach(p => p.classList.remove('bloom'));
+            stem.classList.remove('grow');
+            leaf1.classList.remove('grow');
+            leaf2.classList.remove('grow');
+            document.getElementById('flower-center-group').classList.remove('pulse');
+
+            petalsCounter.textContent = `0 / ${questions.length} Pétalos`;
+
+            finalCard.classList.add('hidden');
+            resetBtn.classList.add('hidden');
+            questionContainer.classList.remove('hidden');
+
+            loadQuestion();
+        }
+
+        function shareResult() {
+            const textToCopy = "🌻 ¡Me regalaron un girasol interactivo especial! Abre y responde el tuyo.";
+            navigator.clipboard.writeText(window.location.href)
+                .then(() => alert("¡Enlace copiado al portapapeles! Puedes enviárselo a quien desees."))
+                .catch(() => alert("Copiado al portapapeles."));
+        }
+
+        function openCustomizerModal() {
+            const listContainer = document.getElementById('custom-questions-list');
+            listContainer.innerHTML = '';
+
+            questions.forEach((q, idx) => {
+                const item = document.createElement('div');
+                item.className = 'glass-card-light p-3 rounded-xl space-y-2 border border-sunflower-500/20';
+                item.innerHTML = `
+                    <label class="block text-xs font-semibold text-sunflower-300">Pregunta ${idx + 1}:</label>
+                    <input type="text" id="custom-q-${idx}" value="${q.question}" class="w-full bg-sunflower-950/80 border border-sunflower-500/30 rounded-lg p-2 text-xs text-sunflower-100 focus:outline-none focus:border-sunflower-400">
+                    <label class="block text-[10px] text-sunflower-300/70">Nota oculta para el pétalo:</label>
+                    <input type="text" id="custom-note-${idx}" value="${q.petalNote || ''}" class="w-full bg-sunflower-950/80 border border-sunflower-500/30 rounded-lg p-1.5 text-xs text-sunflower-200 focus:outline-none">
+                `;
+                listContainer.appendChild(item);
+            });
+
+            document.getElementById('custom-final-msg-input').value = localStorage.getItem('sunflower_custom_final_msg') || document.getElementById('final-message').textContent.replace(/^"|"$/g, '');
+
+            document.getElementById('customizer-modal').classList.remove('hidden');
+        }
+
+        function closeCustomizerModal() {
+            document.getElementById('customizer-modal').classList.add('hidden');
+        }
+
+        function saveCustomQuestions() {
+            const updatedQuestions = questions.map((q, idx) => {
+                const newTitle = document.getElementById(`custom-q-${idx}`).value.trim();
+                const newNote = document.getElementById(`custom-note-${idx}`).value.trim();
+                return {
+                    ...q,
+                    question: newTitle || q.question,
+                    petalNote: newNote || q.petalNote
+                };
+            });
+
+            const newFinalMsg = document.getElementById('custom-final-msg-input').value.trim();
+
+            questions = updatedQuestions;
+            localStorage.setItem('sunflower_custom_questions', JSON.stringify(questions));
+            if (newFinalMsg) {
+                localStorage.setItem('sunflower_custom_final_msg', newFinalMsg);
+            }
+
+            closeCustomizerModal();
+            resetQuiz();
+        }
+
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let particles = [];
+        const particleCount = 45;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = -Math.random() * 0.8 - 0.2;
+                this.opacity = Math.random() * 0.6 + 0.2;
+                this.color = Math.random() > 0.3 ? '#fbbf24' : '#fef3c7';
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.y < 0 || this.x < 0 || this.x > canvas.width) {
+                    this.y = canvas.height + 10;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        function triggerMicroSparkles() {
+            for (let i = 0; i < 10; i++) {
+                const p = new Particle();
+                p.x = canvas.width / 2 + (Math.random() - 0.5) * 200;
+                p.y = canvas.height / 2 + (Math.random() - 0.5) * 200;
+                p.size = Math.random() * 4 + 2;
+                particles.push(p);
+                setTimeout(() => particles.shift(), 2000);
+            }
+        }
+
+        function triggerGoldenConfetti() {
+            for (let i = 0; i < 60; i++) {
+                const p = new Particle();
+                p.x = canvas.width / 2;
+                p.y = canvas.height / 2;
+                p.speedX = (Math.random() - 0.5) * 6;
+                p.speedY = (Math.random() - 0.5) * 6;
+                p.size = Math.random() * 5 + 2;
+                p.color = '#fbbf24';
+                particles.push(p);
+            }
+        }
+
+        window.onload = function() {
+            renderInitialSVGStructure();
+            loadQuestion();
+            initParticles();
+            animateParticles();
+        };
+    </script>
+</body>
+</html>
