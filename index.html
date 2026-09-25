@@ -297,12 +297,7 @@
                     </h2>
 
                     <p id="final-message" class="text-sunflower-100/90 text-sm md:text-base leading-relaxed glass-card-light p-5 rounded-2xl border border-sunflower-400/20 italic">
-                        "No te voy a dejar ser espectadora se que derrepente querias algo fisico pero derrepente el tiempo y la distancia no me deja hacerlo, asi que aqui tienes algo que hice con mucho cariño TQM ANDY PRO"
-                    </p>
-
-                    <p class="text-xs text-sunflower-300/70">
-                        <i class="fa-solid fa-circle-info mr-1"></i> Toca individualmente cada pétalo del girasol para revivir tus respuestas.
-                    </p>
+Hiciste florecer el girasol... pero el sistema mantuvo tus respuestas en secreto. 🤫 Tendremos que salir a tomar algo para que me cuentes qué respondiste.                   </p>
 
                     <div class="flex flex-wrap items-center justify-center gap-4 pt-2">
                         <button onclick="shareResult()" class="btn-sunflower px-6 py-3 rounded-xl flex items-center gap-2 text-sm">
@@ -330,10 +325,6 @@
                 </button>
             </div>
 
-            <p class="text-xs text-sunflower-100/70">
-                Puedes adaptar las preguntas para dedicárselo a tu pareja, mejor amigo/a o familiar.
-            </p>
-
             <div id="custom-questions-list" class="space-y-4">
                 <!-- Se llena con JS -->
             </div>
@@ -360,76 +351,76 @@
            ========================================================================== */
         const DEFAULT_QUESTIONS = [
             {
-                question: "¿Cuál es el color con el que se me caracteriza?",
+                question: "¿Cuál es el color se caracteiza Setiembre?",
                 options: ["Azul", "Negro", "Blanco", "Amarillo"],
                 correct: 1,
-                petalNote: "Negro: Representa la gran manera que me conoces."
+                petalNote: "Amarillo: Por la gran Primavera."
             },
             {
-                question: "¿Donde formamos una linda amistad?",
-                options: ["Puku Puku", "Nike", "Starbucks", "Haagen daz"],
+                question: "¿Donde es mejor trabajar?",
+                options: ["Cineplanet", "Nike", "Starbucks", "Coolbox"],
                 correct: 2,
-                petalNote: "Starbucks: Donde un turno nos junto más."
+                petalNote: "Cineplanet: Donde verdaderamente es los Fieles."
             },
             {
-                question: "¿A quien extraño más?",
-                options: ["Flaviana", "Cielo", "Andrea B.", "Andy"],
+                question: "Si quisieras tener una cita ¿Donde seria tu lugar preferido?",
+                options: ["Cafeteria", "Cine", "Parque", "Malecon(Miraflores)"],
                 correct: 3,
-                petalNote: "Andy: es a la unica que extraño."
+                petalNote: "Cafeteria: Para poder hablar sobre nosotros."
             },
             {
-                question: "¿En que momento nos volvimos inseparables?",
-                options: ["El primer turno", "Cuando ibamos caminando", "En una cata de cafe", "Cuando nos drogabamos"],
+                question: "¿Qué tan espontáneo/a te consideras cuando alguien te propone un plan inesperado?",
+                options: ["100% listo/a para lo que sea.", "Depende del plan.", "Prefiero con anticipación.", "Si hay comida, voy."],
                 correct: 0,
-                petalNote: "Caminabamos: Las mejores caminatas nocturnas HDP."
+                petalNote: "."
             },
             {
-                question: "Si terminamos en la carcel ¿Cual seria el motivo?",
-                options: ["Culpa tuya", "Culpa mia", "Porque yo te defendi", "Por ser los mas PROS"],
+                question: "Si te invito a salir esta semana, ¿qué me dices?",
+                options: ["De una, ¿a qué hora?", "Acepto, pero yo elijo el lugar.", "Reviso mi agenda y te aviso.", "Sí, promete que será divertido."],
                 correct: 1,
-                petalNote: "Simplemente los mas PROS de todos."
+                petalNote: ""
             },
             {
-                question: "Si quisieras que este con alguien¿Con quien seria?",
-                options: ["Flaviana", "Andrea B.", "Cielo", "Ninguna de las anteriores"],
+                question: "¿Qué hace que una cita sea perfecta?",
+                options: ["Buenas risas sin pausa.", "Probar algo nuevo.", "Que el plan sea sorpresa.", "Cero presiones, todo fluido."],
                 correct: 3,
-                petalNote: "Estoy mejor solo a la firme."
+                petalNote: ""
             },
             {
-                question: "¿En qué época del año se regalan popularmente flores amarillas?",
-                options: ["Al inicio de la Primavera", "En pleno Invierno", "En Halloween", "Cualquier día es perfecto"],
+                question: "¿Cuál es tu superpoder social?",
+                options: ["Romper el hielo de una.", "Sacar buenas risas.", "Saber escuchar de verdad.", "Tener los mejores chismes."],
                 correct: 3,
-                petalNote: "¡Cualquier día es especial para dar amor!"
+                petalNote: ""
             },
             {
-                question: "¿Que es lo que mas extrañas de trabajar juntos?",
-                options: ["Hablar en cada cierre", "Insultarnos", "Contarnos todo", "Todas las anteriores"],
+                question: "En un grupo de amigos, ¿qué rol cumples?",
+                options: ["La que organiza todo.", "La que se apunta a todo.", "La que llega tarde.", "La que calma los dramas."],
                 correct: 3,
-                petalNote: "Yo se que extrañas todo SIMPLE."
+                petalNote: ""
             },
             {
-                question: "¿Qué superpoder crees que define nuestra amistad?",
-                options: ["Entendernos solo con una mirada", "Saber aconsejarnos", "Pensar los mismo", "Copiar personalidades"],
+                question: "¿Qué tan rápido se te pasa el tiempo cuando la estás pasando bien?",
+                options: ["Volando, en un pestañeo.", "Súper rápido si hay buena charla.", "Depende de la música/ambiente.", "Ni me doy cuenta de la hora."],
                 correct: 0,
-                petalNote: "Yo se que todo asi que OÑO"
+                petalNote: ""
             },
             {
-                question: "¿Qué cualidad mía sientes que complementa mejor tu personalidad?",
-                options: ["La capacidad de escuchar sin juzgar", "La sinceridad directa cuando necesitas un consejo", "Todas las anteriores", "Que gay"],
+                question: "¿Qué tipo de comida nunca falla para ti?",
+                options: ["Pastas o italiana.", "Hamburguesas / Fast food.", "Comida marina / Ceviche.", "Postres y dulces."],
                 correct: 0,
-                petalNote: "Yo se que es muy gay pero bueno."
+                petalNote: ""
             },
             {
-                question: "Un pensamiento bonito para hoy:",
-                options: ["Sigue brillando a tu ritmo", "Eres más fuerte de lo que crees", "Nunca dejes de sonreír", "Las tres son verdaderas"],
+                question: "¿Cuál es tu momento favorito del día para salir?",
+                options: ["Tarde soleada / Atardecer.", "Noche para cenar o tomar algo.", "Mañana de fin de semana.", "A cualquier hora es bueno."],
                 correct: 3,
-                petalNote: "Nunca dejes de brillar a tu propio ritmo."
+                petalNote: ""
             },
             {
-                question: "¿Estás listo/a para ver tu girasol completamente florecido?",
-                options: ["¡Sí, quiero ver el resultado!", "¡Por supuesto!", "¡Absolutamente!", "¡Sii! 🌻"],
+                question: "Para hacer florecer el girasol... ¿cuándo nos vemos?",
+                options: ["Este fin de semana.", "A mitad de semana.", "Tú dime el día.", "Mañana mismo."],
                 correct: 3,
-                petalNote: "¡Florecido completamente para ti!"
+                petalNote: ""
             }
         ];
 
